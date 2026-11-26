@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laporan Harian Proyek</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mu:#5d6772;--bd:#d5dae0;--ac:#1d5fd1;--acx:#fff;--dg:#b3261e;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171a;--card:#1e2328;--tx:#e8ebee;--mu:#9aa5b1;--bd:#363e46;--ac:#6ea0ff;--acx:#0b1424;--dg:#ff8a80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171a;--card:#1e2328;--tx:#e8ebee;--mu:#9aa5b1;--bd:#363e46;--ac:#6ea0ff;--acx:#0b1424;--dg:#ff8a80;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:96px}
+header{padding:16px 16px 4px}
+h1{font-size:20px;margin:0}
+header p{margin:4px 0 0;color:var(--mu);font-size:13px}
+main{max-width:720px;margin:0 auto;padding:8px 12px}
+details{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin:10px 0;overflow:hidden}
+summary{padding:14px;font-weight:600;cursor:pointer;list-style:none}
+summary::after{content:"▾";float:right;color:var(--mu)}
+details:not([open]) summary::after{content:"▸"}
+.body{padding:0 14px 14px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g .w{grid-column:1/-1}
+label{display:block;font-size:12px;color:var(--mu);font-weight:600}
+input,textarea,select{display:block;width:100%;margin-top:4px;padding:10px;font:inherit;font-size:16px;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+textarea{min-height:64px;resize:vertical}
+.tk{display:grid;grid-template-columns:1fr 84px;gap:8px;align-items:center;padding:3px 0;border-bottom:1px dashed var(--bd)}
+.tk span{font-size:14px}.tk input{margin:0;text-align:right;padding:7px 10px}
+.tot{display:flex;justify-content:space-between;font-weight:700;padding-top:10px}
+.row{border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:10px;display:grid;gap:8px}
+button{font:inherit;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:10px 14px;cursor:pointer}
+.del{color:var(--dg);justify-self:end;padding:6px 10px;font-size:13px}
+.add{width:100%;border-style:dashed;color:var(--ac);font-weight:600}
+.calc{background:var(--bg);border-radius:8px;padding:10px;margin-top:10px;font-size:13px;color:var(--mu)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;max-width:100%}
+.bar button{flex:1;font-weight:600}
+.pri{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--tx);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;max-width:90%;display:none;text-align:center}
+.mini{font-size:12px;color:var(--mu);margin:8px 0 0}
+.row img{width:100%;max-height:280px;object-fit:contain;border-radius:8px;background:var(--bg)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Laporan Harian Proyek</h1>
+  <p>Isi di HP, simpan sebagai file Excel, lalu kirim ke Google Drive atau email. Isian tersimpan otomatis di perangkat ini.</p>
+</header>
+<main>
+<details open><summary>1. Identitas proyek</summary><div class="body g">
+  <label>Pemilik<input id="pemilik" data-f="pemilik"></label>
+  <label>Konsultan MK<input id="konsultan" data-f="konsultan"></label>
+  <label>Kontraktor<input id="kontraktor" data-f="kontraktor"></label>
+  <label>Nama proyek<input id="proyek" data-f="proyek"></label>
+  <label class="w">Pekerjaan<input id="pekerjaan" data-f="pekerjaan"></label>
+  <label>No. SPK kontrak<input id="spk" data-f="spk"></label>
+  <label>Tanggal SPK (mulai)<input id="tglMulai" data-f="tglMulai" type="date"></label>
+  <label>Waktu pelaksanaan (hari)<input id="durasi" data-f="durasi" inputmode="numeric" placeholder="mis. 365"></label>
+  <label>Perpanjangan waktu I<input id="p1" data-f="p1" placeholder="tanggal / minggu ke"></label>
+  <label class="w">Perpanjangan waktu II<input id="p2" data-f="p2" placeholder="tanggal / minggu ke"></label>
+</div></details>
+
+<details open><summary>2. Periode laporan</summary><div class="body">
+  <label>Tanggal laporan<input id="tglLaporan" data-f="tglLaporan" type="date"></label>
+  <div class="calc" id="calc">Isi tanggal SPK dan tanggal laporan untuk menghitung minggu ke, hari ke, dan sisa hari.</div>
+</div></details>
+
+<details><summary>3. Tenaga kerja</summary><div class="body">
+  <div id="tk"></div>
+  <div class="tot"><span>TOTAL</span><span id="tkTotal">0</span></div>
+</div></details>
+
+<details><summary>4. Material yang masuk hari ini</summary><div class="body">
+  <div id="mat"></div><button type="button" class="add" onclick="addRow('mat');persist()">+ Tambah material</button>
+</div></details>
+
+<details><summary>5. Alat yang digunakan</summary><div class="body">
+  <div id="alt"></div><button type="button" class="add" onclick="addRow('alt');persist()">+ Tambah alat</button>
+</div></details>
+
+<details open><summary>6. Uraian pekerjaan</summary><div class="body">
+  <div id="uro"></div><button type="button" class="add" onclick="addRow('uro');persist()">+ Tambah uraian pekerjaan</button>
+</div></details>
+
+<details open><summary>7. Foto progres pekerjaan</summary><div class="body">
+  <datalist id="jobs"></datalist>
+  <div class="g"><button type="button" class="add" onclick="$('#cam').click()">Ambil foto</button><button type="button" class="add" onclick="$('#gal').click()">Dari galeri</button></div>
+  <input type="file" id="cam" accept="image/*" capture="environment" hidden>
+  <input type="file" id="gal" accept="image/*" multiple hidden>
+  <div id="ph" style="margin-top:10px"></div>
+  <p class="mini">Isi nama pekerjaan pada tiap foto. Foto dengan nama pekerjaan yang sama dikelompokkan otomatis di laporan (Excel dan PDF).</p>
+</div></details>
+
+<details><summary>8. Jam kerja dan cuaca</summary><div class="body g">
+  <label>Mulai jam<input id="jamMulai" data-f="jamMulai" type="time"></label>
+  <label>Sampai jam<input id="jamSelesai" data-f="jamSelesai" type="time"></label>
+  <label class="w">Jam kerja tidak dapat digunakan penuh karena (kosongkan bila normal)<input id="jamAlasan" data-f="jamAlasan"></label>
+  <label>Cuaca pagi<select id="cPagi" data-f="cPagi"><option></option><option>Cerah</option><option>Berawan</option><option>Mendung</option><option>Hujan ringan</option><option>Hujan lebat</option></select></label>
+  <label>Cuaca sore<select id="cSore" data-f="cSore"><option></option><option>Cerah</option><option>Berawan</option><option>Mendung</option><option>Hujan ringan</option><option>Hujan lebat</option></select></label>
+</div></details>
+
+<details><summary>9. Catatan dan tanda tangan</summary><div class="body g">
+  <label class="w">Catatan<textarea id="catatan" data-f="catatan"></textarea></label>
+  <label>Kota<input id="kota" data-f="kota"></label>
+  <label>Nama penanda tangan pemilik<input id="ttd1" data-f="ttd1"></label>
+  <label>Koordinator PMSC<input id="ttd2" data-f="ttd2"></label>
+  <label>Manager Konstruksi<input id="ttd3" data-f="ttd3"></label>
+</div></details>
+
+<p class="mini">Laporan baru: tombol di bawah mengosongkan material, alat, uraian, cuaca, dan catatan, tetapi identitas proyek dan tenaga kerja tetap.</p>
+<button type="button" class="add" onclick="laporanBaru()" style="margin-top:8px">Mulai laporan hari baru</button>
+</main>
+
+<div class="bar">
+  <button type="button" onclick="simpan('xlsx')">Excel</button>
+  <button type="button" onclick="simpan('pdf')">PDF</button>
+  <button type="button" class="pri" onclick="bagikan()">Bagikan</button>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var TK=[["Project Manager",1],["Deputy Project Manager",1],["Engineering",17],["Komersial",7],["Keuangan",13],["Danlat",5],["Produksi",10],["Safety Officer",5],["Mandor Sipil",""],["Tukang Sipil",""],["Mandor Arsitek",""],["Tukang Arsitek",""],["Mandor MEP",""],["Tukang MEP",""],["Subkont",""]];
+var LISTS={
+  mat:{cols:[["jenis","Jenis bahan","text"],["terima","Jumlah diterima","text"],["tolak","Jumlah ditolak","text"]]},
+  alt:{cols:[["nama","Nama alat","text"],["jml","Jumlah","text"]]},
+  uro:{cols:[["uraian","Uraian pekerjaan","area"],["progress","Progress","text"],["target","Target / volume hari ini","text"],["hambatan","Hambatan","text"]]}
+};
+var DEF={pemilik:"PT. Angkasa Pura I",konsultan:"PT. Jaya CM",kontraktor:"PT. Wijaya Karya (Persero)",kota:"Makasar"};
+var BLN=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+var HRI=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+var STORE="lh_v1",saveT,DL=null;
+
+function pd(v){return v?new Date(v+"T00:00:00"):null}
+function fmt(v){var d=pd(v);return d?d.getDate()+" "+BLN[d.getMonth()]+" "+d.getFullYear():""}
+function hari(v){var d=pd(v);return d?HRI[d.getDay()]:""}
+function num(v){v=String(v==null?"":v).trim();return /^-?\d+([.,]\d+)?$/.test(v)?Number(v.replace(",",".")):v}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function toast(m){var t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(function(){t.style.display="none"},3500)}
+
+function addRow(k,v){
+  v=v||{};var row=document.createElement("div");row.className="row";
+  LISTS[k].cols.forEach(function(c){
+    var w=document.createElement("label");w.textContent=c[1];
+    var i=document.createElement(c[2]==="area"?"textarea":"input");
+    if(c[2]!=="area")i.type="text";
+    i.dataset.c=c[0];i.value=v[c[0]]==null?"":v[c[0]];w.appendChild(i);row.appendChild(w);
+  });
+  var x=document.createElement("button");x.type="button";x.className="del";x.textContent="Hapus baris";
+  x.onclick=function(){row.remove();persist()};row.appendChild(x);
+  $("#"+k).appendChild(row);
+}
+
+function collect(){
+  var f={};document.querySelectorAll("[data-f]").forEach(function(e){f[e.dataset.f]=e.value});
+  var tk=[].map.call(document.querySelectorAll("[data-tk]"),function(e){return e.value});
+  var lists={};
+  Object.keys(LISTS).forEach(function(k){
+    lists[k]=[].map.call(document.querySelectorAll("#"+k+" .row"),function(r){
+      var o={};r.querySelectorAll("[data-c]").forEach(function(e){o[e.dataset.c]=e.value});return o;
+    });
+  });
+  return {f:f,tk:tk,lists:lists};
+}
+function persist(){
+  clearTimeout(saveT);
+  saveT=setTimeout(function(){try{localStorage.setItem(STORE,JSON.stringify(collect()))}catch(e){}},300);
+}
+function loadSaved(){try{return JSON.parse(localStorage.getItem(STORE))||{}}catch(e){return {}}}
+
+function hitung(){
+  var t=0;document.querySelectorAll("[data-tk]").forEach(function(e){var n=parseFloat(String(e.value).replace(",","."));if(!isNaN(n))t+=n});
+  $("#tkTotal").textContent=t;
+  var m=pd($("#tglMulai").value),l=pd($("#tglLaporan").value),du=parseInt($("#durasi").value,10),c=$("#calc");
+  if(m&&l){
+    var h=Math.floor((l-m)/864e5)+1,mg=Math.max(1,Math.ceil(h/7)),s=isNaN(du)?"-":du-h;
+    c.textContent=hari($("#tglLaporan").value)+", "+fmt($("#tglLaporan").value)+" | Minggu ke "+mg+" | Hari ke "+h+" | Sisa hari "+s;
+  }else c.textContent="Isi tanggal SPK dan tanggal laporan untuk menghitung minggu ke, hari ke, dan sisa hari.";
+}
+
+function init(){
+  var tkBox=$("#tk"),saved=loadSaved(),sf=saved.f||{};
+  TK.forEach(function(r,i){
+    var d=document.createElement("div");d.className="tk";
+    var s=document.createElement("span");s.textContent=r[0];
+    var n=document.createElement("input");n.type="text";n.inputMode="numeric";n.dataset.tk=i;
+    n.value=saved.tk&&saved.tk[i]!=null?saved.tk[i]:r[1];
+    d.appendChild(s);d.appendChild(n);tkBox.appendChild(d);
+  });
+  document.querySelectorAll("[data-f]").forEach(function(e){
+    var k=e.dataset.f;
+    if(sf[k]!=null)e.value=sf[k];else if(DEF[k])e.value=DEF[k];
+  });
+  if(!$("#tglLaporan").value)$("#tglLaporan").value=today();
+  Object.keys(LISTS).forEach(function(k){
+    var arr=(saved.lists&&saved.lists[k])||[];
+    if(arr.length)arr.forEach(function(v){addRow(k,v)});else if(k==="uro")addRow(k);
+  });
+  hitung();
+}
+document.addEventListener("input",function(){hitung();persist();refreshJobs()});
+
+function laporanBaru(){
+  ["mat","alt","uro"].forEach(function(k){$("#"+k).innerHTML=""});
+  addRow("uro");
+  ["jamMulai","jamSelesai","jamAlasan","cPagi","cSore","catatan"].forEach(function(id){$("#"+id).value=""});
+  $("#tglLaporan").value=today();
+  PH=[];savePh();renderPh();
+  hitung();persist();toast("Laporan baru siap diisi");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function mk(){
+  var d=collect(),f=d.f,ws,r;
+  var wb=new ExcelJS.Workbook();
+  ws=wb.addWorksheet("LAPORAN HARIAN",{pageSetup:{paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.4,right:.4,top:.4,bottom:.4,header:.2,footer:.2}}});
+  for(var i=1;i<=12;i++)ws.getColumn(i).width=15;
+  var th={style:"thin"},bd={top:th,left:th,bottom:th,right:th},HF="FFD9E1F2";
+  function put(r1,c1,r2,c2,v,o){
+    o=o||{};
+    if(r1!==r2||c1!==c2)ws.mergeCells(r1,c1,r2,c2);
+    for(var a=r1;a<=r2;a++)for(var b=c1;b<=c2;b++)ws.getCell(a,b).border=bd;
+    var x=ws.getCell(r1,c1);x.value=v;
+    x.font={name:"Arial",size:o.sz||9,bold:!!o.b};
+    x.alignment={vertical:o.v||"middle",horizontal:o.h||"left",wrapText:true};
+    if(o.fill)x.fill={type:"pattern",pattern:"solid",fgColor:{argb:o.fill}};
+  }
+  var H={b:true,h:"center",fill:HF};
+  put(1,1,1,12,"LAPORAN HARIAN",{b:true,h:"center",sz:14});ws.getRow(1).height=26;
+  put(2,1,2,3,"PEMILIK",H);put(2,4,2,6,"KONSULTAN MK",H);put(2,7,2,9,"PROYEK",H);put(2,10,2,12,"KONTRAKTOR",H);
+  put(3,1,4,3,f.pemilik,{h:"center",b:true});put(3,4,4,6,f.konsultan,{h:"center",b:true});
+  put(3,7,4,9,f.proyek,{h:"center",b:true});put(3,10,4,12,f.kontraktor,{h:"center",b:true});
+  put(5,1,5,12,"PEKERJAAN :  "+(f.pekerjaan||""),{b:true});
+  var m=pd(f.tglMulai),l=pd(f.tglLaporan),du=parseInt(f.durasi,10),h="",mg="",s="";
+  if(m&&l){h=Math.floor((l-m)/864e5)+1;mg=Math.max(1,Math.ceil(h/7));s=isNaN(du)?"":du-h}
+  var L=[["NO. SPK KONTRAK",f.spk],["TANGGAL SPK",fmt(f.tglMulai)],["WAKTU PELAKSANAAN",f.durasi?f.durasi+" hari":""],["PERPANJANGAN WAKTU I",f.p1],["PERPANJANGAN WAKTU II",f.p2]];
+  var R=[["HARI",hari(f.tglLaporan)],["TANGGAL",fmt(f.tglLaporan)],["MINGGU KE",mg],["HARI KE",h],["SISA HARI",s]];
+  for(var k=0;k<5;k++){
+    r=6+k;
+    put(r,1,r,2,L[k][0],{b:true});put(r,3,r,6,L[k][1]||"");
+    put(r,7,r,9,R[k][0],{b:true});put(r,10,r,12,R[k][1]===""?"":R[k][1]);
+  }
+  r=11;
+  put(r,1,r,4,"TENAGA KERJA",H);put(r,5,r,8,"MATERIAL YANG MASUK HARI INI",H);put(r,9,r,12,"ALAT - ALAT YANG DIGUNAKAN",H);
+  r=12;
+  put(r,1,r,3,"KEAHLIAN",H);put(r,4,r,4,"JUMLAH (ORANG)",H);
+  put(r,5,r,6,"JENIS BAHAN",H);put(r,7,r,7,"DITERIMA",H);put(r,8,r,8,"DITOLAK",H);
+  put(r,9,r,11,"YANG DIGUNAKAN",H);put(r,12,r,12,"JUMLAH",H);
+  var mat=d.lists.mat,alt=d.lists.alt,n=Math.max(TK.length,mat.length,alt.length),tot=0;
+  for(var i2=0;i2<n;i2++){
+    r=13+i2;
+    var t=TK[i2],tv=t?num(d.tk[i2]):"";
+    if(typeof tv==="number")tot+=tv;
+    put(r,1,r,3,t?t[0]:"");put(r,4,r,4,tv,{h:"center"});
+    var ma=mat[i2]||{},al=alt[i2]||{};
+    put(r,5,r,6,ma.jenis||"");put(r,7,r,7,num(ma.terima),{h:"center"});put(r,8,r,8,num(ma.tolak),{h:"center"});
+    put(r,9,r,11,al.nama||"");put(r,12,r,12,num(al.jml),{h:"center"});
+  }
+  r=13+n;
+  put(r,1,r,3,"TOTAL",{b:true});
+  put(r,4,r,4,{formula:"SUM(D13:D"+(r-1)+")",result:tot},{b:true,h:"center"});
+  put(r,5,r,12,"");
+  r++;
+  put(r,1,r,7,"URAIAN PEKERJAAN",H);put(r,8,r,8,"PROGRESS",H);put(r,9,r,9,"TARGET",H);put(r,10,r,12,"HAMBATAN",H);
+  var uro=d.lists.uro;if(uro.length<4){for(var z=uro.length;z<4;z++)uro.push({})}
+  uro.forEach(function(u){
+    r++;
+    put(r,1,r,7,u.uraian||"",{v:"top"});put(r,8,r,8,u.progress||"",{h:"center",v:"top"});
+    put(r,9,r,9,u.target||"",{h:"center",v:"top"});put(r,10,r,12,u.hambatan||"",{v:"top"});
+    var lines=Math.max(Math.ceil((u.uraian||"").length/95),Math.ceil((u.hambatan||"").length/45),1);
+    ws.getRow(r).height=Math.max(22,lines*12+6);
+  });
+  r++;
+  var jam="Pekerjaan dimulai jam "+(f.jamMulai||"............")+" s/d jam "+(f.jamSelesai||"............");
+  put(r,1,r,6,jam);put(r,7,r,12,"KEADAAN CUACA HARI INI",H);
+  r++;
+  put(r,1,r,6,"Jam kerja (sepenuhnya dapat / sebagian tidak dapat digunakan untuk bekerja) karena: "+(f.jamAlasan||"-"));
+  put(r,7,r,9,"PAGI: "+(f.cPagi||"-"),{h:"center"});put(r,10,r,12,"SORE: "+(f.cSore||"-"),{h:"center"});
+  ws.getRow(r).height=30;
+  r++;
+  put(r,1,r,12,"Catatan :\n"+(f.catatan||""),{v:"top"});
+  ws.getRow(r).height=Math.max(50,Math.ceil((f.catatan||"").length/150)*12+28);
+  r++;
+  var sg=function(a,b,c,d2,e){return a+"\n"+b+"\n\n\n\n\n"+(c||"")+"\n"+d2};
+  put(r,1,r,4,"Mengetahui,\n"+(f.pemilik||"")+"\n\n\n\n\n"+(f.ttd1||"")+"\n ",{h:"center",v:"top"});
+  put(r,5,r,8,"Menyetujui / menolak\nPMSC\n"+(f.konsultan||"")+"\n\n\n\n"+(f.ttd2||"")+"\nKoordinator PMSC",{h:"center",v:"top"});
+  put(r,9,r,12,(f.kota||"")+", "+fmt(f.tglLaporan)+"\nKontraktor Pelaksana\n"+(f.kontraktor||"")+"\n\n\n\n"+(f.ttd3||"")+"\nManager Konstruksi",{h:"center",v:"top"});
+  ws.getRow(r).height=125;
+  addPhotoSheet(wb);
+  var buf=await wb.xlsx.writeBuffer();
+  return new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function nm(e){return "Laporan_Harian_"+($("#tglLaporan").value||today())+"."+e}
+function b2b64(b){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result).split(",")[1])};r.onerror=no;r.readAsDataURL(b)})}
+function isNative(){var C=window.Capacitor;return !!(C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.Filesystem&&C.Plugins.Share)}
+async function nativeShare(items){
+  var P=Capacitor.Plugins,uris=[];
+  for(var i=0;i<items.length;i++){var w=await P.Filesystem.writeFile({path:items[i].name,data:await b2b64(items[i].blob),directory:"CACHE"});uris.push(w.uri)}
+  await P.Share.share({title:"Laporan Harian",files:uris});
+}
+async function build(kind){return kind==="pdf"?mkPdf():mk()}
+
+/* ---- Foto progres ---- */
+var PH=[],JOBS=[];
+function loadPh(){try{PH=JSON.parse(localStorage.getItem("lh_ph"))||[]}catch(e){PH=[]}}
+function savePh(){try{localStorage.setItem("lh_ph",JSON.stringify(PH))}catch(e){toast("Memori penuh: foto tidak tersimpan permanen. Ekspor laporan lebih dulu.")}}
+function refreshJobs(){
+  var s=[],dl=$("#jobs");
+  document.querySelectorAll("#uro [data-c=uraian]").forEach(function(e){var v=e.value.trim();if(v&&s.indexOf(v)<0)s.push(v)});
+  JOBS=s;dl.innerHTML="";
+  s.forEach(function(v){var o=document.createElement("option");o.value=v;dl.appendChild(o)});
+}
+function shrink(file){return new Promise(function(ok,no){
+  var u=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var k=Math.min(1,1000/Math.max(im.width,im.height)),w=Math.round(im.width*k),h=Math.round(im.height*k),c=document.createElement("canvas");
+    c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);URL.revokeObjectURL(u);ok({src:c.toDataURL("image/jpeg",.7),w:w,h:h})};
+  im.onerror=no;im.src=u})}
+async function addPhotos(files){
+  for(var i=0;i<files.length;i++){
+    try{var p=await shrink(files[i]);p.job=PH.length?PH[PH.length-1].job:(JOBS[0]||"");p.ket="";PH.push(p)}
+    catch(e){toast("Satu foto gagal dibaca")}
+  }
+  savePh();renderPh();
+}
+$("#cam").onchange=$("#gal").onchange=function(){var f=[].slice.call(this.files);this.value="";addPhotos(f)};
+function renderPh(){
+  var box=$("#ph");box.innerHTML="";
+  PH.forEach(function(p,i){
+    var c=document.createElement("div"),im=document.createElement("img");c.className="row";im.src=p.src;c.appendChild(im);
+    [["job","Nama pekerjaan"],["ket","Keterangan (opsional)"]].forEach(function(x){
+      var l=document.createElement("label");l.textContent=x[1];
+      var n=document.createElement("input");n.type="text";if(x[0]==="job")n.setAttribute("list","jobs");
+      n.value=p[x[0]]||"";n.oninput=function(){p[x[0]]=n.value;savePh()};l.appendChild(n);c.appendChild(l);
+    });
+    var d=document.createElement("button");d.type="button";d.className="del";d.textContent="Hapus foto";
+    d.onclick=function(){PH.splice(i,1);savePh();renderPh()};c.appendChild(d);box.appendChild(c);
+  });
+}
+function groups(){
+  var g=[],ix={};
+  PH.forEach(function(p){var k=(p.job||"").trim()||"Tanpa nama pekerjaan";if(ix[k]==null){ix[k]=g.length;g.push({job:k,items:[]})}g[ix[k]].items.push(p)});
+  return g;
+}
+function addPhotoSheet(wb){
+  if(!PH.length)return;
+  var ws=wb.addWorksheet("FOTO PROGRES",{pageSetup:{paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
+  for(var i=1;i<=12;i++)ws.getColumn(i).width=15;
+  var r=1;ws.mergeCells(r,1,r,12);
+  var t=ws.getCell(r,1);t.value="FOTO PROGRES PEKERJAAN - "+fmt($("#tglLaporan").value);t.font={bold:true,size:13};t.alignment={horizontal:"center"};
+  groups().forEach(function(g){
+    r+=2;ws.mergeCells(r,1,r,12);
+    var h=ws.getCell(r,1);h.value=g.job;h.font={bold:true,size:11};h.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFD9E1F2"}};
+    for(var i=0;i<g.items.length;i+=2){
+      r++;ws.getRow(r).height=232;
+      for(var j=0;j<2&&i+j<g.items.length;j++){
+        var p=g.items[i+j],k=Math.min(400/p.w,300/p.h),id=wb.addImage({base64:p.src,extension:"jpeg"});
+        ws.addImage(id,{tl:{col:j*6+0.1,row:r-1+0.05},ext:{width:Math.round(p.w*k),height:Math.round(p.h*k)}});
+      }
+      r++;
+      for(j=0;j<2&&i+j<g.items.length;j++){
+        ws.mergeCells(r,j*6+1,r,j*6+6);
+        var c=ws.getCell(r,j*6+1);c.value=g.items[i+j].ket||"";c.alignment={wrapText:true,vertical:"top"};c.font={size:9,italic:true};
+      }
+    }
+  });
+}
+
+/* ---- PDF ---- */
+function per(f){
+  var m=pd(f.tglMulai),l=pd(f.tglLaporan),du=parseInt(f.durasi,10);
+  if(!(m&&l))return {h:"",mg:"",s:""};
+  var h=Math.floor((l-m)/864e5)+1;return {h:h,mg:Math.max(1,Math.ceil(h/7)),s:isNaN(du)?"":du-h};
+}
+async function mkPdf(){
+  var d=collect(),f=d.f,doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4"}),M=10,y=M;
+  doc.setFont("helvetica","bold");doc.setFontSize(14);doc.text("LAPORAN HARIAN",148.5,y+4,{align:"center"});y+=8;
+  var st={fontSize:8,cellPadding:1.2,lineColor:[120,120,120],lineWidth:.2,textColor:20,valign:"middle"};
+  var hs={fillColor:[217,225,242],textColor:20,fontStyle:"bold",halign:"center"};
+  var S=function(x){return x==null?"":String(x)};
+  function T(o){
+    if(o.body)o.body=o.body.map(function(r){return r.map(function(c){return c!=null&&typeof c==="object"?c:S(c)})});
+    doc.autoTable(Object.assign({startY:y,margin:{left:M,right:M},styles:st,headStyles:hs,footStyles:hs,theme:"grid"},o));
+    y=doc.lastAutoTable.finalY;
+  }
+  var p=per(f);
+  T({head:[["PEMILIK","KONSULTAN MK","PROYEK","KONTRAKTOR"]],body:[[f.pemilik,f.konsultan,f.proyek,f.kontraktor]],bodyStyles:{halign:"center",fontStyle:"bold",minCellHeight:10}});
+  T({body:[[{content:"PEKERJAAN :  "+S(f.pekerjaan),styles:{fontStyle:"bold"}}]]});
+  T({body:[
+    ["NO. SPK KONTRAK",f.spk,"HARI / TANGGAL",(hari(f.tglLaporan)+", "+fmt(f.tglLaporan)).replace(/^, $/,"")],
+    ["TANGGAL SPK",fmt(f.tglMulai),"MINGGU KE",p.mg],
+    ["WAKTU PELAKSANAAN",f.durasi?f.durasi+" hari":"","HARI KE",p.h],
+    ["PERPANJANGAN WAKTU I",f.p1,"SISA HARI",p.s],
+    ["PERPANJANGAN WAKTU II",f.p2,"",""]
+  ],columnStyles:{0:{fontStyle:"bold",cellWidth:45},2:{fontStyle:"bold",cellWidth:45}}});
+  var mat=d.lists.mat,alt=d.lists.alt,n=Math.max(TK.length,mat.length,alt.length),tot=0,rows=[];
+  for(var i=0;i<n;i++){
+    var t=TK[i],tv=t?d.tk[i]:"",nv=parseFloat(String(tv).replace(",","."));if(!isNaN(nv))tot+=nv;
+    var ma=mat[i]||{},al=alt[i]||{};
+    rows.push([t?t[0]:"",tv,ma.jenis,ma.terima,ma.tolak,al.nama,al.jml]);
+  }
+  T({head:[["KEAHLIAN","JUMLAH (ORANG)","JENIS BAHAN","DITERIMA","DITOLAK","ALAT YANG DIGUNAKAN","JUMLAH"]],body:rows,foot:[["TOTAL",String(tot),"","","","",""]],
+    styles:Object.assign({},st,{cellPadding:.8}),columnStyles:{1:{halign:"center"},3:{halign:"center"},4:{halign:"center"},6:{halign:"center"}}});
+  var uro=d.lists.uro.length?d.lists.uro:[{}];
+  T({head:[["URAIAN PEKERJAAN","PROGRESS","TARGET","HAMBATAN"]],body:uro.map(function(u){return [u.uraian,u.progress,u.target,u.hambatan]}),
+    columnStyles:{0:{cellWidth:150},1:{halign:"center",cellWidth:25},2:{halign:"center",cellWidth:30}}});
+  T({body:[
+    ["Pekerjaan dimulai jam "+(f.jamMulai||"......")+" s/d jam "+(f.jamSelesai||"......")+"\nJam kerja terganggu karena: "+(f.jamAlasan||"-"),
+     "KEADAAN CUACA HARI INI\nPAGI: "+(f.cPagi||"-")+"     SORE: "+(f.cSore||"-")],
+    [{content:"Catatan :\n"+S(f.catatan),colSpan:2,styles:{minCellHeight:16,valign:"top"}}]
+  ]});
+  if(y>150){doc.addPage();y=M}
+  var sg={halign:"center",valign:"top",minCellHeight:40};
+  T({body:[[
+    {content:"Mengetahui,\n"+S(f.pemilik)+"\n\n\n\n\n"+S(f.ttd1),styles:sg},
+    {content:"Menyetujui / menolak\nPMSC\n"+S(f.konsultan)+"\n\n\n"+S(f.ttd2)+"\nKoordinator PMSC",styles:sg},
+    {content:S(f.kota)+", "+fmt(f.tglLaporan)+"\nKontraktor Pelaksana\n"+S(f.kontraktor)+"\n\n\n"+S(f.ttd3)+"\nManager Konstruksi",styles:sg}
+  ]]});
+  if(PH.length){
+    doc.addPage();y=M;doc.setFont("helvetica","bold");doc.setFontSize(13);
+    doc.text("FOTO PROGRES PEKERJAAN - "+fmt(f.tglLaporan),148.5,y+4,{align:"center"});y+=9;
+    groups().forEach(function(g){
+      if(y+98>200){doc.addPage();y=M}
+      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setFillColor(217,225,242);doc.rect(M,y,277,6,"F");
+      doc.text(doc.splitTextToSize(g.job,270)[0],M+2,y+4.3);y+=8;
+      for(var i=0;i<g.items.length;i+=2){
+        if(y+90>200){doc.addPage();y=M}
+        for(var j=0;j<2&&i+j<g.items.length;j++){
+          var q=g.items[i+j],x=M+j*142,k=Math.min(135/q.w,78/q.h),w=q.w*k,h=q.h*k;
+          doc.addImage(q.src,"JPEG",x+(135-w)/2,y+(78-h)/2,w,h);doc.setDrawColor(150);doc.rect(x,y,135,78);
+          doc.setFont("helvetica","italic");doc.setFontSize(8);doc.text(doc.splitTextToSize(q.ket||"",135).slice(0,2),x,y+82);
+        }
+        y+=90;
+      }
+    });
+  }
+  return doc.output("blob");
+}
+
+async function simpan(kind){
+  try{
+    toast("Menyiapkan file...");
+    var blob=await build(kind),name=nm(kind==="pdf"?"pdf":"xlsx");
+    if(isNative())await nativeShare([{name:name,blob:blob}]);
+    else if(DL){await DL.save({filename:name,data:blob});toast("File siap disimpan");}
+    else{
+      var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;
+      document.body.appendChild(a);a.click();a.remove();toast("File diunduh");
+    }
+  }catch(e){
+    if(e&&e.code==="declined")return toast("Penyimpanan dibatalkan");
+    if(e&&e.code==="host_unavailable")return toast("Buka halaman ini di Chrome untuk menyimpan file");
+    toast("Gagal menyimpan: "+((e&&e.message)||"coba lagi"));
+  }
+}
+async function bagikan(){
+  try{
+    var xb=await mk(),pb=await mkPdf(),n1=nm("xlsx"),n2=nm("pdf");
+    if(isNative()){await nativeShare([{name:n1,blob:xb},{name:n2,blob:pb}]);return}
+    var fs=[new File([xb],n1,{type:xb.type}),new File([pb],n2,{type:"application/pdf"})];
+    if(navigator.canShare&&navigator.canShare({files:fs})){
+      await navigator.share({files:fs,title:"Laporan Harian "+fmt($("#tglLaporan").value)});
+    }else{
+      toast("Berbagi langsung tidak tersedia di sini. Gunakan Simpan .xlsx, lalu unggah ke Drive atau lampirkan di email.");
+    }
+  }catch(e){
+    if(e&&e.name==="AbortError")return;
+    toast("Gagal membagikan. Gunakan tombol Simpan .xlsx.");
+  }
+}
+
+init();loadPh();renderPh();refreshJobs();
+try{
+  if(window.claude&&claude.use)claude.use("downloads").then(function(x){DL=x}).catch(function(){});
+}catch(e){}
+</script>
+</body>
+</html>
